@@ -15,3 +15,11 @@ dasdsa
 
 ## 2. How to use this repo
 1. Download remote repository into your system (PC or server)
+
+  - git clone https://github.com/aninatroya/ABSA_Tweets.git
+
+2. Download necessary dependencies
+
+  - pip install -r requirements.txt
+
+
