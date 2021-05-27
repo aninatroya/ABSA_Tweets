@@ -17,7 +17,14 @@ from wordcloud import STOPWORDS, WordCloud
 from nltk.probability import FreqDist
 from nltk.tokenize import word_tokenize
 import re
+import configparser
 
+config = configparser.ConfigParser()
+config.read('src/config.ini')
+CONFIG = config
+
+## environment variables
+INPUT_FILEPATH = config['project_configuration']['input_filepath']
 
 ## dictionaries of aspects and entities
 #Aspects-target Dictionary: (Factors motivating plant based choices)
@@ -69,6 +76,7 @@ targets_entities_dict = {
 def translate_text(text=None):
     """
     Transform a one or more tweets within a JSON file to a pandas dataframe with a prior translating function
+
     :param text:
     :return:
     """
@@ -77,10 +85,11 @@ def translate_text(text=None):
     return translated_text
 
 
-def from_json_to_pandas(input_filepath=None, lines=True, topic_to_add=None, language='en', max_rows=None, save=False,
-                        output_path=None):
+def from_json_to_pandas(input_filepath=INPUT_FILEPATH, lines=True, topic_to_add=None, language='en', max_rows=None,
+                        save=False, output_path=None):
     """ Function that reads a json file with one or more tweets and returns a pandas dataframe. The library should be
     https://github.com/twintproject/twint (twint, not Tweepy, which is the Twitter scraper that we have developed).
+
     :param output_path:
     :param input_filepath: where the json files containing tweets FROM TWEEPY LIBRARY are stored
     :param lines: if the json file has more than 1 tweet, activate to rue, else False
@@ -148,6 +157,7 @@ def visualize_wordcloud(activate=True, dataframe=None, column='hashtags'):
 def hashtag_and_mention_removal(df=None, tweet_column='tweet', colname=None):
     """ This function takes a dataframe returned by the "from_json_to_pandas" function and
     extract hashtags [#], mentions [@] and urls
+
     :param colname: name of the new column to be added, for tweets without hashtags
     :param tweet_column:
     :param df: original dataframe returned by the from_json_to_pandas() function
@@ -178,6 +188,7 @@ def tokenize_in_sentences(df=None, id_colname=None, colname=None, subjectivity_t
     This function takes a dataframe given by the given by hashtag_and_mention_removal() and takes
     the dataframe clean tweets column and creates N observations per tweet, being N the number of
     sentences that such tweet has.
+
     :param subjectivity_threshold:
     :param df: dataframe returned by previous function hashtag_and_mention_removal()
     :param id_colname: unique id per tweet
@@ -206,6 +217,7 @@ def aspect_or_entity_extraction(dataframe, dictionary, colname='sentence', trans
                                 df_columns=None, merge=False, join='left', drop_aspect_nas=False):
     """
     Extract all aspects and creates N observations per aspect per sentence
+
     :param drop_aspect_nas:
     :param join:
     :param merge:
@@ -306,6 +318,7 @@ def dataframe_to_model(dataframe=None, filter_by='Aspect Category', agg_by='sent
 
 def features_targets_splitter(dataframe):
     """
+
     :param dataframe:
     :return:
     """
@@ -317,6 +330,7 @@ def add_linguistic_features_to_df(df=None, mode='POS', from_colname=None, new_co
     """
     This functions inputs a pandas.DataFrame object, executes POS or NER, adds such column to the input dataframe and
     finally, saves or not the output dataframe.
+
     :param df: input daraframe (it should be pandas.DataFrame object)
     :param mode: either NER or POS
     :param from_colname: the column in which we are going to iterate to extract NER or POS
@@ -356,3 +370,11 @@ def add_linguistic_features_to_df(df=None, mode='POS', from_colname=None, new_co
         df.to_csv(saving_filepath)
 
     return df
+
+
+
+
+
+
+
+
