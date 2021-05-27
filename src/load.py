@@ -17,7 +17,11 @@ import nltk
 nltk.download('wordnet')
 nltk.download('wordnet')
 nltk.download('popular')
+import configparser
 
+config = configparser.ConfigParser()
+config.read('src/config.ini')
+CONFIG = config
 
 # from PyDictionary import PyDictionary
 # dictionary=PyDictionary()
@@ -27,16 +31,16 @@ class SListener(StreamListener):
     """
     Class to download tweets directly from the Twitter API
     """
-    API_key = ''
-    API_secret = ''
+    API_key = config['project_configuration']['api_key']
+    API_secret = config['project_configuration']['api_secret']
     Bearer_token = ''
-    Access_token = ''
-    Access_token_secret = ''
+    Access_token = config['project_configuration']['atoken']
+    Access_token_secret = config['project_configuration']['atoken_secret']
 
     def __init__(self, api = None, fprefix = 'streamer', api_key='',
                  api_secret='',
                  btoken=None, atoken='',
-                 atoken_secret='', output_filpath='data/'):
+                 atoken_secret='', output_filpath=config['project_configuration']['output_filepath']):
 
         ## local variables (codes from a given personal Twitter account)
         self.API_key = api_key
