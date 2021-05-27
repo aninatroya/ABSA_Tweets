@@ -1,64 +1,42 @@
 ''' add GPU vs CPU option '''
-from sys import path
 import os
 import sys
 # sys.path.append(os.path.join(sys.path[0], 'src'))
 sys.path.append(os.getcwd() + '//' + 'src')
 sys.path.append(os.getcwd())
 
-
 from tweepy.streaming import StreamListener
 from tweepy import API
 from tweepy import OAuthHandler
 from tweepy import Stream
 import time
 import json
-import sys
-
-from tweepy.streaming import StreamListener
-from tweepy import API
-from tweepy import OAuthHandler
-from tweepy import Stream
-import time
-import json
-import sys
-
-import pandas as pd
-import numpy as np
-
-from tweepy.streaming import StreamListener
-from tweepy import API
-from tweepy import OAuthHandler
-from tweepy import Stream
-import time
-import json
-import sys
+from typing import List, Optional
 # from google.cloud import translate
-from googletrans import Translator
 import nltk
 nltk.download('wordnet')
 nltk.download('wordnet')
 nltk.download('popular')
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from gensim.models import Word2Vec
-from nltk.corpus import wordnet
+
+
 # from PyDictionary import PyDictionary
 # dictionary=PyDictionary()
-import matplotlib.pyplot as plt
-
 
 ## function that loads data from Twitter
 class SListener(StreamListener):
-    API_key = '3gdvDVxyGHvV6rxiAALM3ibWR'
-    API_secret = '2FcmbIBKEy10wdxLYprNxBtwqlYz9gKoIrFW7VJQrcSYS44aS6'
+    """
+    Class to download tweets directly from the Twitter API
+    """
+    API_key = ''
+    API_secret = ''
     Bearer_token = ''
-    Access_token = '1313037754436128768-zTXqZfiDXrOguXDji7vYUQnWEscQf1'
-    Access_token_secret = 'E4AsropFEwgBiHFBCLU00YjLYC42kgPcLZVnZvmXRp0e5'
+    Access_token = ''
+    Access_token_secret = ''
 
-    def __init__(self, api = None, fprefix = 'streamer', api_key='3gdvDVxyGHvV6rxiAALM3ibWR',
-                 api_secret='2FcmbIBKEy10wdxLYprNxBtwqlYz9gKoIrFW7VJQrcSYS44aS6',
-                 btoken=None, atoken='1313037754436128768-zTXqZfiDXrOguXDji7vYUQnWEscQf1',
-                 atoken_secret='E4AsropFEwgBiHFBCLU00YjLYC42kgPcLZVnZvmXRp0e5', output_filpath='data/'):
+    def __init__(self, api = None, fprefix = 'streamer', api_key='',
+                 api_secret='',
+                 btoken=None, atoken='',
+                 atoken_secret='', output_filpath='data/'):
 
         ## local variables (codes from a given personal Twitter account)
         self.API_key = api_key
@@ -71,9 +49,14 @@ class SListener(StreamListener):
         self.api = api or API()
         self.counter = 0
         self.fprefix = fprefix
-        self.output  = open(str(output_filpath) + '_%s_%s.json' % (self.fprefix, time.strftime('%Y%m%d-%H%M%S')), 'w')
+        self.output = open(str(output_filpath) + '_%s_%s.json' % (self.fprefix, time.strftime('%Y%m%d-%H%M%S')), 'w')
 
     def on_data(self, data):
+        """
+
+        :param data: not usage
+        :return:
+        """
         if 'in_reply_to_status' in data:
             self.on_status(data)
         elif 'delete' in data:
@@ -86,7 +69,7 @@ class SListener(StreamListener):
         elif 'warning' in data:
             warning = json.loads(data)['warnings']
             print("WARNING: %s" % warning['message'])
-            return
+            return None
 
     def on_status(self, status):
         self.output.write(status)
@@ -115,7 +98,16 @@ class SListener(StreamListener):
         return
 
     @classmethod
-    def execute(cls, active=True):
+    def execute(cls, active=True, sample_or_keyword='keyword', keywords_to_track: List = None):
+        """
+        This method, if executed, starts downloading tweets with the
+        :param sample_or_keyword: if 'keyword', the keywords_to_track argument should be passed with a list with
+        those words that if appear in a tweet, it will be downloaded. If 'sample', a sample will be downloaded
+        without limits
+        :param keywords_to_track: list of words, if one of those is within a tweet, it will be automatically downloaded
+        :param active:
+        :return: None
+        """
         if active:
             auth = OAuthHandler(cls.API_key, cls.API_secret)
             auth.set_access_token(cls.Access_token, cls.Access_token_secret)
@@ -124,11 +116,11 @@ class SListener(StreamListener):
             listen = SListener(api)
             stream = Stream(auth, listen)
 
-            sample_or_keyword = 'keyword'
             if sample_or_keyword == 'sample':
                 stream.sample()
 
             if sample_or_keyword == 'keyword':
-                # keywords_to_track = ['BeyondBurger']
-                keywords_to_track = ['vegan', 'Vegan', 'BeyondBurger', 'BeyondMeat']
                 stream.filter(track=keywords_to_track)
+
+        return None
+
