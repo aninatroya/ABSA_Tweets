@@ -25,6 +25,7 @@ CONFIG = config
 
 ## environment variables
 INPUT_FILEPATH = config['project_configuration']['input_filepath']
+LINGUISTIC_MODE = config['project_configuration']['linguistic_mode']
 
 ## dictionaries of aspects and entities
 #Aspects-target Dictionary: (Factors motivating plant based choices)
@@ -325,7 +326,7 @@ def features_targets_splitter(dataframe):
     pass
 
 
-def add_linguistic_features_to_df(df=None, mode='POS', from_colname=None, new_colname=None, save=False,
+def add_linguistic_features_to_df(df=None, mode=LINGUISTIC_MODE, from_colname=None, new_colname=None, save=False,
                                   saving_format=None, saving_filepath=None):
     """
     This functions inputs a pandas.DataFrame object, executes POS or NER, adds such column to the input dataframe and
