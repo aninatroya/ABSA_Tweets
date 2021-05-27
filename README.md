@@ -1,4 +1,5 @@
-# ABSA_Tweets
+# <center> ABSA_Tweets </center>
+
 Aspect Based Sentiment Analysis of Tweets with BERT for the Plant Based Food Domain. 
 
 Instructions to use this code repository
