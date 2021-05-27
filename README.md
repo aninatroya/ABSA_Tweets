@@ -22,4 +22,5 @@ dasdsa
 
   - pip install -r requirements.txt
 
-
+3. Access the configuration file in src/config.ini and write down your personal configuration parameters
+4. 
