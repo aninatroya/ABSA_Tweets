@@ -16,8 +16,10 @@ import matplotlib.pyplot as plt
 from wordcloud import STOPWORDS, WordCloud
 from nltk.probability import FreqDist
 from nltk.tokenize import word_tokenize
+import logging
 import re
 import configparser
+import ast
 
 config = configparser.ConfigParser()
 config.read('src/config.ini')
@@ -26,6 +28,12 @@ CONFIG = config
 ## environment variables
 INPUT_FILEPATH = config['project_configuration']['input_filepath']
 LINGUISTIC_MODE = config['project_configuration']['linguistic_mode']
+SAVE_DATAFRAME = bool(config['preprocess_functions']['save'])
+SAVE_DATAFRAME_DIRECTORY = ast.literal_eval(config['preprocess_functions']['output_filepath'])
+HREMOVAL_COLNAME = ast.literal_eval(config['preprocess_functions']['colname'])
+SUBJECTIVITY_THRESHOLD = float(config['preprocess_functions']['subjectivity_threshold'])
+SUBJECTIVITY_COLUMN_NAME = config['preprocess_functions']['subjectivity_column_name']
+
 
 ## dictionaries of aspects and entities
 #Aspects-target Dictionary: (Factors motivating plant based choices)
@@ -87,7 +95,7 @@ def translate_text(text=None):
 
 
 def from_json_to_pandas(input_filepath=INPUT_FILEPATH, lines=True, topic_to_add=None, language='en', max_rows=None,
-                        save=False, output_path=None):
+                        save=SAVE_DATAFRAME, output_path=SAVE_DATAFRAME_DIRECTORY):
     """ Function that reads a json file with one or more tweets and returns a pandas dataframe. The library should be
     https://github.com/twintproject/twint (twint, not Tweepy, which is the Twitter scraper that we have developed).
 
@@ -131,6 +139,7 @@ def visualize_wordcloud(activate=True, dataframe=None, column='hashtags'):
     :param activate: visualize a plot of wordclouds from_json_to_pandas function
     :return: frequency distribution of the hashtags
     """
+    error, fdist = 0, 0
     if activate:
         ## generates a list from all the hashtags in the dataframe
         full_hashtag_list = [x for hashtag_list in dataframe[column].values for x in hashtag_list]
@@ -155,17 +164,17 @@ def visualize_wordcloud(activate=True, dataframe=None, column='hashtags'):
     return fdist
 
 
-def hashtag_and_mention_removal(df=None, tweet_column='tweet', colname=None):
+def hashtag_and_mention_removal(dataframe: pd.DataFrame = None, tweet_column='tweet', colname: str = HREMOVAL_COLNAME):
     """ This function takes a dataframe returned by the "from_json_to_pandas" function and
     extract hashtags [#], mentions [@] and urls
 
     :param colname: name of the new column to be added, for tweets without hashtags
-    :param tweet_column:
-    :param df: original dataframe returned by the from_json_to_pandas() function
+    :param tweet_column: column or variable that contains the proper wrote tweet
+    :param dataframe: original dataframe returned by the from_json_to_pandas() function
     :return:
     """
     tweets = []
-    for it, tweet in enumerate(df[tweet_column], 0):
+    for it, tweet in enumerate(dataframe[tweet_column], 0):
         # hashtag removal that removes ONLY useless hastags that not belong to a certain sentence
         # step 1: removes the pattern, which is [#word][with or without space][#word]
         sentence = re.sub(r'#\w+\s*#\w+', '', tweet)
@@ -175,59 +184,72 @@ def hashtag_and_mention_removal(df=None, tweet_column='tweet', colname=None):
         sentence = re.sub(r'@', '', sentence)
         # step 4: removes any url in a tweet
         sentence = re.sub(
-            r'''(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))''',
+            r'''(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]
+            +\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))''',
             '', sentence)
         tweets.append(sentence)
 
-    df[colname] = tweets
+    assert colname is not None
+    dataframe[colname] = tweets
 
-    return df
+    return dataframe
 
 
-def tokenize_in_sentences(df=None, id_colname=None, colname=None, subjectivity_threshold=0.5):
+def tokenize_in_sentences(dataframe: pd.DataFrame = None, id_colname=None, colname=None,
+                          subjectivity_threshold=SUBJECTIVITY_THRESHOLD,
+                          subjectivity_column_name: str = SUBJECTIVITY_COLUMN_NAME):
     """
     This function takes a dataframe given by the given by hashtag_and_mention_removal() and takes
     the dataframe clean tweets column and creates N observations per tweet, being N the number of
     sentences that such tweet has.
 
-    :param subjectivity_threshold:
-    :param df: dataframe returned by previous function hashtag_and_mention_removal()
+    :param subjectivity_column_name: name of the column with the new scores that this function will create
+    :param subjectivity_threshold: it only takes those sentences that have a subjectivity grade over such limit
+    :param dataframe: dataframe returned by previous function hashtag_and_mention_removal()
     :param id_colname: unique id per tweet
     :param colname: name of the column without hashtags, mentions and urls (given by hashtag_and_mention_removal() func)
-    :return:
+    :return: the final dataframe, with more observations (multiplied by the number of sentences over the threshold
+    :rtype: pandas.DataFrame
     """
     result_ls = []
-    for it1, (idx, id, tweet) in enumerate(zip(df.index, df.id, df[colname])):
+    for it1, (idx, id, tweet) in enumerate(zip(dataframe.index, dataframe.id, dataframe[colname])):
         sentences = nltk.sent_tokenize(str(tweet))
         for it2, sentence in enumerate(sentences):
             result_ls.append({'idx': idx, 'id': id, 'it': it2, 'sentence': sentence})
 
     results_df = pd.DataFrame(result_ls)
-    dfx = pd.merge(left=results_df, right=df, how='left', on='id')
+    dfx = pd.merge(left=results_df, right=dataframe, how='left', on='id')
 
     ## add a column with the subjectivity scores for each sentence and filter by equal or more than a rate of 0.5
     # Applying subjectivity scores to the tweets (only sentences df)
-    dfx['Subjectivity'] = dfx.sentence.apply(lambda x: TextBlob(str(x)).sentiment[1])
-    dfx = dfx[dfx['Subjectivity'] >= subjectivity_threshold]
-    dfx.drop(columns=['Subjectivity'], inplace=True)
+    dfx[subjectivity_column_name] = dfx.sentence.apply(lambda x: TextBlob(str(x)).sentiment[1])
+    dfx = dfx[dfx[subjectivity_column_name] >= subjectivity_threshold]
+    dfx.drop(columns=[subjectivity_column_name], inplace=True)
 
     return dfx
 
 
-def aspect_or_entity_extraction(dataframe, dictionary, colname='sentence', transform_to_df=False,
+def aspect_or_entity_extraction(dataframe, dictionary, colname='sentence', transform_to_df=True,
                                 df_columns=None, merge=False, join='left', drop_aspect_nas=False):
     """
     Extract all aspects and creates N observations per aspect per sentence
 
-    :param drop_aspect_nas:
-    :param join:
-    :param merge:
-    :param df_columns:
-    :param transform_to_df:
+    :param drop_aspect_nas: no usage, maintain in False (at least in the current version)
+    :param join: method for the 'merge' parameter (see explanation below). The use of a 'inner', 'left' or
+    'right' join is very important, as an erroneous approach will remove relevant information.
+    :param merge: useful in second round, this is, the first usage with aspect or entity, does not need to be
+    merged, but in the second round, after aspect or entity extraction, it should be merged with the prior newer
+    dataframe
+    :param df_columns: tuple that contains (1) key from the targets entities dictionary, (2)  and (3) the
+    proper sentence for such key target entity.
+    :type df_columns: tuple
+    :param transform_to_df: transform aspect or entities (works for both) to a dataframe object
     :param colname: where the aspects are (sentence column)
     :param dataframe:
-    :param dictionary:
-    :return: a pandas.DataFrame object
+    :param dictionary: "target_entities_dict" or similar object, where all target entities related to
+    the previously given aspect should be match (mandatory object to pass to the function)
+    :return:
+    :rtype: a pandas.DataFrame object
     """
     global df
     asp_aspterm_sent, final = [], []
@@ -312,18 +334,9 @@ def dataframe_to_model(dataframe=None, filter_by='Aspect Category', agg_by='sent
 
 
     ## filter three :: take a sample of size as the minimum frequency
-
+    ## TODO: pending (finally seems not necessary)
 
     return model_df
-
-
-def features_targets_splitter(dataframe):
-    """
-
-    :param dataframe:
-    :return:
-    """
-    pass
 
 
 def add_linguistic_features_to_df(df=None, mode=LINGUISTIC_MODE, from_colname=None, new_colname=None, save=False,
