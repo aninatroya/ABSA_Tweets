@@ -21,18 +21,19 @@ import re
 import configparser
 import ast
 
+## read configuration parameters
 config = configparser.ConfigParser()
 config.read('src/config.ini')
 CONFIG = config
 
 ## environment variables
-INPUT_FILEPATH = config['project_configuration']['input_filepath']
-LINGUISTIC_MODE = config['project_configuration']['linguistic_mode']
-SAVE_DATAFRAME = bool(config['preprocess_functions']['save'])
-SAVE_DATAFRAME_DIRECTORY = ast.literal_eval(config['preprocess_functions']['output_filepath'])
-HREMOVAL_COLNAME = ast.literal_eval(config['preprocess_functions']['colname'])
-SUBJECTIVITY_THRESHOLD = float(config['preprocess_functions']['subjectivity_threshold'])
-SUBJECTIVITY_COLUMN_NAME = config['preprocess_functions']['subjectivity_column_name']
+INPUT_FILEPATH = CONFIG['project_configuration']['input_filepath']
+LINGUISTIC_MODE = CONFIG['project_configuration']['linguistic_mode']
+SAVE_DATAFRAME = bool(CONFIG['preprocess_functions']['save'])
+SAVE_DATAFRAME_DIRECTORY = ast.literal_eval(CONFIG['preprocess_functions']['output_filepath'])
+HREMOVAL_COLNAME = ast.literal_eval(CONFIG['preprocess_functions']['colname'])
+SUBJECTIVITY_THRESHOLD = float(CONFIG['preprocess_functions']['subjectivity_threshold'])
+SUBJECTIVITY_COLUMN_NAME = CONFIG['preprocess_functions']['subjectivity_column_name']
 
 
 ## dictionaries of aspects and entities
