@@ -1,4 +1,3 @@
-  
 ''' add GPU vs CPU option '''
 from sys import path
 import os
@@ -19,17 +18,18 @@ import pandas as pd
 import numpy as np
 import json
 import re
-
+from transformers import GPT2Model
 
 ## enironment variables
 DOWNLOAD_TWEETS = False
 # OUTPUT_FILEPATH =  'data/_streamer_20210322-202719.json' # 'data/tweets.json'
-OUTPUT_FILEPATH =  'G:/nlp/Data__BeyondMeat.json' # 'data/tweets.json'
+OUTPUT_FILEPATH = 'G:/nlp/Data__BeyondMeat.json' # 'data/tweets.json'
 
 
 ## pipeline
 def preprocess_pipeline():
     """
+
     :return:
     """
     ## step 1: download tweets to a folder in the server (my computer)
@@ -38,14 +38,14 @@ def preprocess_pipeline():
         sl.execute() ## tested :: ok
 
     ## step 2: read json with tweets and transform to pandas dataframe
-    df = from_json_to_pandas(input_filepath=OUTPUT_FILEPATH, lines=True, topic_to_add=None, language='en',
+    df = from_json_to_pandas(lines=True, topic_to_add=None, language='en',
                              max_rows=None, save=False, output_path=None) ## tested :: ok
 
     ## step 3: clean previous dataframe and removes hashtags (#) and mentions (@)
-    df = hashtag_and_mention_removal(df=df, tweet_column='tweet', colname='tweet_clean')
+    df = hashtag_and_mention_removal(dataframe=df, tweet_column='tweet', colname='tweet_clean')
 
     ## step 4: takes previous dataframe (clean) and creates a new dataframe with N sentences per tweet (as observations)
-    df = tokenize_in_sentences(df=df, colname='tweet_clean')
+    df = tokenize_in_sentences(dataframe=df, colname='tweet_clean')
 
     ## step 6: extract all entities and creates N observations per entity per sentence
     df = aspect_or_entity_extraction(dataframe=df, dictionary=targets_entities_dict,
@@ -73,6 +73,7 @@ def training_pipeline(filepath='D:/Data final_to_label_df.xlsx', features=None, 
                       activate_semisupervised=False, make_evaluation=True, add_pos_tags=False):
     """
     This function ....
+
     :param add_pos_tags:
     :param make_evaluation:
     :param activate_semisupervised:
@@ -216,3 +217,5 @@ if __name__ == '__main__':
                                  dataframe_for_POS_or_NER=dataframe,
                                  task='polarity_classification', model_type='rnn', executable_type='train',
                                  activate_semisupervised=False, make_evaluation=True, add_pos_tags=False)
+
+
