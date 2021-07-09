@@ -26,8 +26,8 @@ dasdsa
 3. Access the configuration file in src/config.ini and write down your personal configuration parameters
 
 ### 2.2. The "load.py" file
-Initially, there is nothing to modify as the configuration parameters comes from the config.ini file, where the user should put his/her own project configuration parameters
+Initially, there is nothing to modify as the configuration parameters comes from the config.ini file, where the user should put his/her own project configuration parameters.
 
 ### 2.3. The "preprocess.py" file
 - The configuration parameters are red from the config-ini file directly from the "environment variables" of the file. 
-- There is two main dictionaries for the use case "target_aspects_dict" and "targets_entities_dict", **that should be modify directly** by the user, depending on his/her own use cases. The entities that appear in the dictionary, are those that are referred by the aspect dictionary, this is, any comment (tweet) about a given aspect, will be cross with their respective entities. Fo you use-case, you should **take care and modify both dictionaries, as they are related**.
+- There are two main dictionaries for the use case "target_aspects_dict" and "targets_entities_dict", **that should be modify directly** by the user, depending on her/his own use cases. The targets that in the tweets appear are those that are referred by the aspect/entity dictionary. Consecutively any comment (tweet) about a given target aspect or target entity, will be labeled with their respective entities. For your use-case, you should **take care and modify both dictionaries, as they are related**.
