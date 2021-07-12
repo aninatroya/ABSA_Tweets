@@ -7,11 +7,7 @@ In customer centric businesses there is a great scope in utilizing the insights 
 
 The following noteboook presents a stepwise approach to conducting Aspect-Based Sentiment Analysis of social media data starting from the initial step of retrieving the data and finalizing with a confusion matrix to asses how the finetuned model is performing on the data.
 
-### 2. 
-fsdfs
 
-### 3. 
-dasdsa
 
 ## 2. How to use this repo
 ### 2.1. Download the source code to your local machine
