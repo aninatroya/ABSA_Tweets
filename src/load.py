@@ -57,9 +57,10 @@ class SListener(StreamListener):
 
     def on_data(self, data):
         """
+        Function to parse the data received from the Twitter API.
 
         :param data: not usage
-        :return:
+        :return: None
         """
         if 'in_reply_to_status' in data:
             self.on_status(data)
@@ -76,6 +77,16 @@ class SListener(StreamListener):
             return None
 
     def on_status(self, status):
+        """
+        Function to parse the data received from the Twitter API.
+        Parameters
+        ----------
+        status
+
+        Returns
+        -------
+
+        """
         self.output.write(status)
         self.counter += 1
         if self.counter >= 20000:
@@ -109,7 +120,7 @@ class SListener(StreamListener):
         those words that if appear in a tweet, it will be downloaded. If 'sample', a sample will be downloaded
         without limits
         :param keywords_to_track: list of words, if one of those is within a tweet, it will be automatically downloaded
-        :param active:
+        :param active: if True, the program will be executed
         :return: None
         """
         if active:
