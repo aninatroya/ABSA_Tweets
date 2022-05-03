@@ -25,5 +25,5 @@ The following noteboook presents a stepwise approach to conducting Aspect-Based 
 Initially, there is nothing to modify as the configuration parameters comes from the config.ini file, where the user should put his/her own project configuration parameters.
 
 ### 2.3. The "preprocess.py" file
-- The configuration parameters are red from the config-ini file directly from the "environment variables" of the file. 
+- The configuration parameters are red from the config.ini file directly from the "environment variables" of the file. 
 - There are two main dictionaries for the use case "target_aspects_dict" and "targets_entities_dict", **that should be modify directly** by the user, depending on her/his own use cases. The targets that in the tweets appear are those that are referred by the aspect/entity dictionary. Consecutively any comment (tweet) about a given target aspect or target entity, will be labeled with their respective entities. For your use-case, you should **take care and modify both dictionaries, as they are related**.
