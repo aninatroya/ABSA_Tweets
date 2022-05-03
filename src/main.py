@@ -1,3 +1,15 @@
+#!/usr/bin/env python
+
+__author__ = "Anina Troya"
+__copyright__ = "..."
+__credits__ = ["Anina Troya", "..."]
+__license__ = "GPL"
+__version__ = "0.9.0"
+__maintainer__ = "Anina Troya"
+__email__ = "atroyaldc@hotmail.com"
+__status__ = "Production"
+
+
 ''' add GPU vs CPU option '''
 from sys import path
 import os
