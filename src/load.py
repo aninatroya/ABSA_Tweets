@@ -79,6 +79,7 @@ class SListener(StreamListener):
     def on_status(self, status):
         """
         Function to parse the data received from the Twitter API.
+        
         Parameters
         ----------
         status
